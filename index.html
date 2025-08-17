@@ -137,10 +137,15 @@
             margin: 0 auto;
             padding: 20px;
             display: none;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
         .section.active {
             display: block;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         /* Home Section */
@@ -802,6 +807,9 @@
                                 <i class="fas fa-cloud-upload-alt"></i> اختر صورة
                             </label>
                         </div>
+                        <div id="image-preview" style="margin-top: 10px; text-align: center;">
+                            <img id="preview-img" src="#" alt="معاينة الصورة" style="max-width: 100%; max-height: 200px; border-radius: 10px; display: none;">
+                        </div>
                     </div>
                     
                     <button type="submit" class="btn">إنشاء بطاقة الطلب</button>
@@ -906,11 +914,29 @@
             });
             
             // Show the selected section
-            document.getElementById(sectionId).classList.add('active');
+            const selectedSection = document.getElementById(sectionId);
+            selectedSection.classList.add('active');
             
-            // Scroll to top
-            window.scrollTo(0, 0);
+            // Scroll to top smoothly
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
+        
+        // Image preview functionality
+        document.getElementById('bulletin').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewImg = document.getElementById('preview-img');
+                    previewImg.src = event.target.result;
+                    previewImg.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
         
         // Form Submission
         document.getElementById('membership-form').addEventListener('submit', function(e) {
