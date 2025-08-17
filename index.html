@@ -149,13 +149,6 @@
         }
 
         /* Home Section */
-        .home-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
         .home-title {
             font-size: 3rem;
             font-weight: 900;
@@ -362,6 +355,56 @@
             border-color: var(--secondary-color);
         }
 
+        /* Skills Input */
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .skill-tag {
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .skill-tag button {
+            background: none;
+            border: none;
+            color: var(--light-color);
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .add-skill-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-skill-container input {
+            flex: 1;
+        }
+
+        .add-skill-btn {
+            background-color: var(--secondary-color);
+            color: var(--light-color);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-skill-btn:hover {
+            background-color: #2980b9;
+        }
+
         .file-upload {
             position: relative;
             display: inline-block;
@@ -403,6 +446,7 @@
             cursor: pointer;
             transition: var(--transition);
             font-size: 1.1rem;
+            text-decoration: none;
         }
 
         .btn:hover {
@@ -417,6 +461,18 @@
 
         .btn-secondary:hover {
             background-color: #1a2530;
+        }
+
+        .btn-telegram {
+            background-color: #0088cc;
+            color: var(--light-color);
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-telegram:hover {
+            background-color: #0077b3;
         }
 
         /* Card Section */
@@ -601,7 +657,7 @@
 
     <main>
         <!-- Home Section -->
-        <section id="home" class="section home-section active">
+        <section id="home" class="section active">
             <h1 class="home-title">اكتشف شغفك وانضم إلى ناديك المفضل</h1>
             <div class="buttons-grid">
                 <button class="club-button" onclick="showSection('scientific-clubs')">
@@ -790,8 +846,12 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="skills">المهارات (مطلوب مهارتين على الأقل)</label>
-                        <input type="text" id="skills" placeholder="مثال: البرمجة، التصميم" required>
+                        <label>المهارات (مطلوب مهارتين على الأقل)</label>
+                        <div class="skills-container" id="skills-container"></div>
+                        <div class="add-skill-container">
+                            <input type="text" id="skill-input" placeholder="أضف مهارة">
+                            <button type="button" class="add-skill-btn" onclick="addSkill()">إضافة</button>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -866,8 +926,14 @@
                         </ol>
                     </div>
                     
-                    <button class="btn btn-secondary" onclick="showSection('form')">تعديل الطلب</button>
-                    <button class="btn" onclick="showSection('home')">العودة للرئيسية</button>
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-secondary" onclick="showSection('form')">تعديل الطلب</button>
+                        <button class="btn" onclick="showSection('home')">العودة للرئيسية</button>
+                        <a href="https://t.me/ahdivibes" target="_blank" class="btn btn-telegram">
+                            <i class="fab fa-telegram-plane"></i>
+                            إرسال إلى تليجرام
+                        </a>
+                    </div>
                 </div>
             </div>
         </section>
@@ -914,8 +980,7 @@
             });
             
             // Show the selected section
-            const selectedSection = document.getElementById(sectionId);
-            selectedSection.classList.add('active');
+            document.getElementById(sectionId).classList.add('active');
             
             // Scroll to top smoothly
             window.scrollTo({
@@ -923,6 +988,48 @@
                 behavior: 'smooth'
             });
         }
+        
+        // Skills Management
+        const skills = [];
+        
+        function addSkill() {
+            const skillInput = document.getElementById('skill-input');
+            const skill = skillInput.value.trim();
+            
+            if (skill && !skills.includes(skill)) {
+                skills.push(skill);
+                renderSkills();
+                skillInput.value = '';
+            }
+        }
+        
+        function removeSkill(index) {
+            skills.splice(index, 1);
+            renderSkills();
+        }
+        
+        function renderSkills() {
+            const container = document.getElementById('skills-container');
+            container.innerHTML = '';
+            
+            skills.forEach((skill, index) => {
+                const skillTag = document.createElement('div');
+                skillTag.className = 'skill-tag';
+                skillTag.innerHTML = `
+                    ${skill}
+                    <button type="button" onclick="removeSkill(${index})">×</button>
+                `;
+                container.appendChild(skillTag);
+            });
+        }
+        
+        // Allow adding skill with Enter key
+        document.getElementById('skill-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                addSkill();
+            }
+        });
         
         // Image preview functionality
         document.getElementById('bulletin').addEventListener('change', function(e) {
@@ -947,13 +1054,11 @@
             const name = document.getElementById('name').value;
             const familyName = document.getElementById('family-name').value;
             const birthYear = document.getElementById('birth-year').value;
-            const skills = document.getElementById('skills').value;
             const stream = document.getElementById('stream').value;
             const bulletin = document.getElementById('bulletin').files[0];
             
             // Validate skills (at least 2)
-            const skillsArray = skills.split(',').map(skill => skill.trim());
-            if (skillsArray.length < 2) {
+            if (skills.length < 2) {
                 alert('يجب إدخال مهارتين على الأقل');
                 return;
             }
@@ -962,7 +1067,7 @@
             document.getElementById('card-club').textContent = club;
             document.getElementById('card-name').textContent = name + ' ' + familyName;
             document.getElementById('card-birth-year').textContent = birthYear;
-            document.getElementById('card-skills').textContent = skills;
+            document.getElementById('card-skills').textContent = skills.join(', ');
             document.getElementById('card-stream').textContent = stream;
             
             // Display the bulletin image
